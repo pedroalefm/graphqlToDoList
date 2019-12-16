@@ -49,10 +49,10 @@ const RootQuery = new GraphQLObjectType({
 	name: 'RootQuery',
 	fields: {
 		user: {
-			type: new GraphQLList(UserType),
-			args: { email: { type: GraphQLString } },
+			type: UserType,
+			args: { id: { type: GraphQLID } },
 			resolve(parent, args) {
-				return User.find({ email: args.email });
+				return User.findById(args.id);
 			},
 		},
 		users: {
@@ -112,6 +112,35 @@ const Mutation = new GraphQLObjectType({
 					// todoDate: args.todoDate,
 				});
 				return todo.save();
+			},
+		},
+		deleteTodo: {
+			type: TodoType,
+			args: { id: { type: GraphQLID } },
+			resolve(parent, args) {
+				let todo = Todo.findByIdAndRemove(args.id);
+				return todo;
+			},
+		},
+		completeTodo: {
+			type: TodoType,
+			args: { id: { type: GraphQLID } },
+			async resolve(parent, args) {
+				let todo = await Todo.findOneAndUpdate(args.id, {
+					complete: true,
+				});
+
+				return todo;
+			},
+		},
+		updateTodo: {
+			type: TodoType,
+			args: { id: { type: GraphQLID }, name: { type: GraphQLString } },
+			async resolve(parent, args) {
+				let todo = await Todo.findOneAndUpdate(args.id, {
+					name: args.name,
+				});
+				return todo;
 			},
 		},
 	},
